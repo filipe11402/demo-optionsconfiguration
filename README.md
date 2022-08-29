@@ -42,7 +42,7 @@ Based on our context, this allows us to have a single class, for the sake of thi
 Because both `Outlook` and `Gmail` have the same properties, this is a good case where named instances come in handy.
 
 
-### How to test?
+### How?
 Register the named options instances on `Program.cs`
 ```cs
 ...
@@ -77,8 +77,36 @@ public DemoController(
 ---
 
 ## Options Validations
-This feature allows us to perform validations when starting up the project, so that we can avoid running the project in any invalid state, let's say.
+Perform validations on your configurations, so that you can short-cirtuit the app execution and avoid later down the line problems.
 
-### How to test?
+### How?
+Create a new class that inherits from `IValidateOptions<T>`.
 
-MISSING THIS DOCUMENTATION
+Register that same class as a Singleton
+```cs
+builder.Services.AddSingleton<IValidateOptions<YouValidationClass>, YourValidationClass>();
+```
+
+Register, **in this case**, the named instance options.
+
+```cs
+//Provide the name of that option + bind the desired configuration from IConfiguration
+
+builder.Services.AddOptions<EmailSettings>(EmailSettings.OutlookKey)
+    .Bind(builder.Configuration.GetSection("EmailSettings:Outlook"))
+    .ValidateOnStart();
+builder.Services.AddOptions<EmailSettings>(EmailSettings.GmailKey)
+    .Bind(builder.Configuration.GetSection("EmailSettings:Gmail"))
+    .ValidateOnStart();
+```
+
+If you don't want to validate when you run the project, just ommit the `ValidateOnStart()`, that will make the validation to only occur whenever you call one of the `IOptions` instances.
+
+---
+
+## References
+[@Elfocrach](https://github.com/Elfocrash)
+
+[@NelsonBN](https://github.com/NelsonBN)
+
+[Microsoft docs](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options)
